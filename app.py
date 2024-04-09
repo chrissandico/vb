@@ -1,10 +1,14 @@
 import requests
 import streamlit as st
 import streamlit_authenticator as stauth
-import bcrypt
 import yaml
 from yaml.loader import SafeLoader
-
+from streamlit_authenticator.utilities.exceptions import (CredentialsError,
+                                                          ForgotError,
+                                                          LoginError,
+                                                          RegisterError,
+                                                          ResetError,
+                                                          UpdateError) 
 # API Gateway URL for your Lambda function
 API_GATEWAY_URL = "https://qsh7ju1xd0.execute-api.us-east-1.amazonaws.com/test/vb"
 
@@ -19,18 +23,11 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
-# Define the fields for the login form
-#fields = {
-#    "username": "Username",
-#    "password": "Password",
-#    "submit_button": "Login"
-#}
-
-# Authentication logic
-#name, authentication_status, username = authenticator.login('Login', fields)
-
-authenticator.login()
-
+# Creating a login widget
+try:
+    authenticator.login()
+except LoginError as e:
+    st.error(e)
 
 if st.session_state["authentication_status"]:
     # Authenticated, show app content
@@ -46,7 +43,9 @@ if st.session_state["authentication_status"]:
 
     def main():
         st.title("Fun Things To Do")
-        
+        authenticator.logout()
+        st.write(f'Welcome *{st.session_state["name"]}*')
+
         name = st.radio("Select a name", ["Preston", "Isaac"])
 
         # Submit button
