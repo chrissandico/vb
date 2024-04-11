@@ -36,8 +36,14 @@ def main():
                 task_label = f"{i}. {task['name']} ({task['duration']} minutes) - {task['description']}"
                 st.write(task_label)
 
+            # Display the workout
+            st.subheader("Your workout for the day")
+            for i, exercise in enumerate(result['selected_exercises'], start=1):
+                exercise_label = f"{i}. {exercise['exercise']} ({exercise['sets']} minutes) - {exercise['instructions']} - {exercise['video']}"
+                st.write(exercise_label)
+
             # Display the random task
-            st.subheader("Random Task")
+            st.subheader("Bonus Task")
             if result['random_task']:
                 st.write(f"- {result['random_task']['name']} ({result['random_task']['duration']} minutes) - {result['random_task']['description']}")
             else:
