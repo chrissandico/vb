@@ -28,14 +28,15 @@ def main():
     #    """
     #)
 
-    components.iframe("https://www.google.com/maps/d/u/0/embed?mid=1z2gVnWpg3rWW3VfzNzJwL8gcTZC-qtU&ehbc=2E312F&noprof=1", height=500)
-
+    
 
 
     st.title("Fun Things To Do")
-
+    
     # Get user input
     name = st.radio("Select a name", ["Preston", "Isaac"])
+
+    components.iframe("https://www.google.com/maps/d/u/0/embed?mid=1z2gVnWpg3rWW3VfzNzJwL8gcTZC-qtU&ehbc=2E312F&noprof=1", height=500)
 
     # Submit button
     if st.button("Submit"):
