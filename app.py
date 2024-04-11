@@ -26,7 +26,7 @@ def main():
 
     # Submit button
     if st.button("Submit"):
-        with st.spinner('Retrieving tasks...'):
+        with st.spinner('Putting the list together...!'):
             result = trigger_lambda(name)
         if result:
             st.balloons()
@@ -39,7 +39,7 @@ def main():
             # Display the workout
             st.subheader("Your workout for the day")
             for i, exercise in enumerate(result['selected_exercises'], start=1):
-                exercise_label = f"{i}. {exercise['exercise']} ({exercise['sets']} minutes) - {exercise['instructions']} - {exercise['video']}"
+                exercise_label = f"{i}. {exercise['exercise']} ({exercise['sets']} sets) - {exercise['instructions']} - {exercise['video']}"
                 st.write(exercise_label)
 
             # Display the random task
