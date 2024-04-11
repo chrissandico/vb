@@ -1,5 +1,7 @@
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
+
 
 # API Gateway URL for your Lambda function
 API_GATEWAY_URL = "https://qsh7ju1xd0.execute-api.us-east-1.amazonaws.com/test/vb"
@@ -17,6 +19,17 @@ def trigger_lambda(name):
     return data
 
 def main():
+
+
+    #<iframe src="https://www.google.com/maps/d/u/0/embed?mid=1z2gVnWpg3rWW3VfzNzJwL8gcTZC-qtU&ehbc=2E312F&noprof=1" width="640" height="480"></iframe>
+    #components.html(
+    #    """
+    #    <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1z2gVnWpg3rWW3VfzNzJwL8gcTZC-qtU&ehbc=2E312F&noprof=1" width="640" height="480"></iframe>
+    #    """
+    #)
+
+    components.iframe("https://www.google.com/maps/d/u/0/embed?mid=1z2gVnWpg3rWW3VfzNzJwL8gcTZC-qtU&ehbc=2E312F&noprof=1", height=500)
+
 
 
     st.title("Fun Things To Do")
