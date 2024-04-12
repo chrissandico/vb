@@ -19,24 +19,10 @@ def trigger_lambda(name):
     return data
 
 def main():
-
-
-    #<iframe src="https://www.google.com/maps/d/u/0/embed?mid=1z2gVnWpg3rWW3VfzNzJwL8gcTZC-qtU&ehbc=2E312F&noprof=1" width="640" height="480"></iframe>
-    #components.html(
-    #    """
-    #    <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1z2gVnWpg3rWW3VfzNzJwL8gcTZC-qtU&ehbc=2E312F&noprof=1" width="640" height="480"></iframe>
-    #    """
-    #)
-
-    
-
-
     st.title("Fun Things To Do")
     
     # Get user input
     name = st.radio("Select a name", ["Preston", "Isaac"])
-
-    components.iframe("https://www.google.com/maps/d/u/0/embed?mid=1z2gVnWpg3rWW3VfzNzJwL8gcTZC-qtU&ehbc=2E312F&noprof=1", height=500)
 
     # Submit button
     if st.button("Submit"):
