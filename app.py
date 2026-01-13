@@ -121,24 +121,54 @@ def main():
             -webkit-text-fill-color: transparent;
         }
         .task-card {
-            background-color: #f0f2f6;
+            background-color: #ffffff;
             padding: 1.5rem;
             border-radius: 10px;
             margin-bottom: 1rem;
             border-left: 5px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #1f1f1f;
+        }
+        .task-card h4 {
+            color: #1f1f1f;
+            margin-bottom: 0.5rem;
+        }
+        .task-card p {
+            color: #333333;
+            margin: 0.3rem 0;
         }
         .exercise-card {
-            background-color: #f0f2f6;
+            background-color: #ffffff;
             padding: 1.5rem;
             border-radius: 10px;
             margin-bottom: 1.5rem;
             border-left: 5px solid #764ba2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #1f1f1f;
+        }
+        .exercise-card h4 {
+            color: #1f1f1f;
+            margin-bottom: 0.5rem;
+        }
+        .exercise-card p {
+            color: #333333;
+            margin: 0.3rem 0;
         }
         .bonus-card {
-            background-color: #fff4e6;
+            background-color: #ffffff;
             padding: 1.5rem;
             border-radius: 10px;
             border-left: 5px solid #ff9800;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #1f1f1f;
+        }
+        .bonus-card h4 {
+            color: #1f1f1f;
+            margin-bottom: 0.5rem;
+        }
+        .bonus-card p {
+            color: #333333;
+            margin: 0.3rem 0;
         }
         </style>
     """, unsafe_allow_html=True)
