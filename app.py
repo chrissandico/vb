@@ -1,22 +1,75 @@
-import requests
 import streamlit as st
-import streamlit.components.v1 as components
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import random
 
+# Google Sheets configuration
+SPREADSHEET_ID = "1CSokDhyaVLpc9tJgJDKD-y6G_ClmN7aRFrUL6xursro"
+SERVICE_ACCOUNT_FILE = "service-account.json"
 
-# API Gateway URL for your Lambda function
-API_GATEWAY_URL = "https://qsh7ju1xd0.execute-api.us-east-1.amazonaws.com/test/vb"
+@st.cache_resource
+def get_sheets_client():
+    """Initialize and cache the Google Sheets client"""
+    scope = ['https://spreadsheets.google.com/feeds',
+             'https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scope)
+    return gspread.authorize(creds)
 
-def trigger_lambda(name):
-    payload = {"user": name}
-    #st.write(payload)
-    response = requests.post(API_GATEWAY_URL, json=payload)
-    #st.write(response.content)
+def fetch_activities(name):
+    """Fetch activities from Google Sheets for the specified user"""
     try:
-        data = response.json()        
-    except ValueError as e:
-        st.error(f"Error parsing response: {e}")
+        client = get_sheets_client()
+        spreadsheet = client.open_by_key(SPREADSHEET_ID)
+        
+        # Get tasks and exercises sheets
+        tasks_sheet = spreadsheet.worksheet('poppies')
+        exercises_sheet = spreadsheet.worksheet('exercises')
+        
+        # Get all records as list of dictionaries
+        all_tasks = tasks_sheet.get_all_records()
+        all_exercises = exercises_sheet.get_all_records()
+        
+        # Filter out empty rows
+        tasks = [t for t in all_tasks if t.get('Task Name')]
+        exercises = [e for e in all_exercises if e.get('Exercise')]
+        
+        # Select random tasks and exercises
+        num_tasks = min(5, len(tasks))
+        num_exercises = min(5, len(exercises))
+        
+        selected_tasks = random.sample(tasks, num_tasks) if tasks else []
+        selected_exercises = random.sample(exercises, num_exercises) if exercises else []
+        
+        # Pick a random bonus task (different from selected tasks)
+        remaining_tasks = [t for t in tasks if t not in selected_tasks]
+        random_task = random.choice(remaining_tasks) if remaining_tasks else None
+        
+        # Format the response to match expected structure
+        return {
+            'selected_tasks': [
+                {
+                    'name': t['Task Name'],
+                    'duration': t['Duration'],
+                    'description': t['Task Description']
+                } for t in selected_tasks
+            ],
+            'selected_exercises': [
+                {
+                    'exercise': e['Exercise'],
+                    'sets': e['Sets'],
+                    'instructions': e['Instructions'],
+                    'video': e['Example']
+                } for e in selected_exercises
+            ],
+            'random_task': {
+                'name': random_task['Task Name'],
+                'duration': random_task['Duration'],
+                'description': random_task['Task Description']
+            } if random_task else None
+        }
+    except Exception as e:
+        st.error(f"Error fetching data from Google Sheets: {e}")
         return None
-    return data
 
 def main():
     st.title("Fun Things To Do")
@@ -27,25 +80,26 @@ def main():
     # Submit button
     if st.button("Submit"):
         with st.spinner('Putting the list together...!'):
-            result = trigger_lambda(name)
+            result = fetch_activities(name)
         if result:
             st.balloons()
             # Display the selected tasks as a numbered list
             st.subheader("For " + name)
-            for i, task in enumerate(result['selected_tasks'], start=1):
+            for i, task in enumerate(result.get('selected_tasks', []), start=1):
                 task_label = f"{i}. {task['name']} ({task['duration']} minutes) - {task['description']}"
                 st.write(task_label)
 
             # Display the workout
             st.subheader("Your workout for the day")
-            for i, exercise in enumerate(result['selected_exercises'], start=1):
+            for i, exercise in enumerate(result.get('selected_exercises', []), start=1):
                 exercise_label = f"{i}. {exercise['exercise']} ({exercise['sets']} sets) - {exercise['instructions']} - {exercise['video']}"
                 st.write(exercise_label)
 
             # Display the random task
             st.subheader("Bonus Task")
-            if result['random_task']:
-                st.write(f"- {result['random_task']['name']} ({result['random_task']['duration']} minutes) - {result['random_task']['description']}")
+            random_task = result.get('random_task')
+            if random_task:
+                st.write(f"- {random_task['name']} ({random_task['duration']} minutes) - {random_task['description']}")
             else:
                 st.write("No random task available.")
         else:
