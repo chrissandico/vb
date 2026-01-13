@@ -87,39 +87,135 @@ def fetch_activities(name):
         st.error(f"Error fetching data from Google Sheets: {e}")
         return None
 
-def main():
-    st.title("Fun Things To Do")
+def extract_youtube_id(url):
+    """Extract YouTube video ID from various URL formats"""
+    if not url or not isinstance(url, str):
+        return None
     
-    # Get user input
-    name = st.radio("Select a name", ["Preston", "Isaac"])
+    # Handle youtu.be format
+    if 'youtu.be/' in url:
+        return url.split('youtu.be/')[-1].split('?')[0]
+    # Handle youtube.com format
+    elif 'youtube.com/watch?v=' in url:
+        return url.split('v=')[-1].split('&')[0]
+    # Handle embed format
+    elif 'youtube.com/embed/' in url:
+        return url.split('embed/')[-1].split('?')[0]
+    
+    return None
+
+def main():
+    # Page config for better styling
+    st.set_page_config(page_title="Daily Activities", page_icon="🎯", layout="wide")
+    
+    # Custom CSS for better styling
+    st.markdown("""
+        <style>
+        .main-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .task-card {
+            background-color: #f0f2f6;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 5px solid #667eea;
+        }
+        .exercise-card {
+            background-color: #f0f2f6;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid #764ba2;
+        }
+        .bonus-card {
+            background-color: #fff4e6;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 5px solid #ff9800;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<h1 class="main-title">🎯 Daily Activities</h1>', unsafe_allow_html=True)
+    
+    # Centered name selection
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        name = st.radio("Who's ready for today?", ["Preston", "Isaac"], horizontal=True)
+        submit_button = st.button("🚀 Get My Activities", use_container_width=True, type="primary")
 
     # Submit button
-    if st.button("Submit"):
-        with st.spinner('Putting the list together...!'):
+    if submit_button:
+        with st.spinner('✨ Creating your personalized list...'):
             result = fetch_activities(name)
+        
         if result:
             st.balloons()
-            # Display the selected tasks as a numbered list
-            st.subheader("For " + name)
+            st.markdown("---")
+            
+            # Display tasks section
+            st.markdown(f"### 📋 Tasks for {name}")
             for i, task in enumerate(result.get('selected_tasks', []), start=1):
-                task_label = f"{i}. {task['name']} ({task['duration']} minutes) - {task['description']}"
-                st.write(task_label)
-
-            # Display the workout
-            st.subheader("Your workout for the day")
+                with st.container():
+                    st.markdown(f"""
+                        <div class="task-card">
+                            <h4>{i}. {task['name']}</h4>
+                            <p><strong>⏱️ Duration:</strong> {task['duration']} minutes</p>
+                            <p>{task['description']}</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+            
+            st.markdown("---")
+            
+            # Display workout section
+            st.markdown("### 💪 Today's Workout")
             for i, exercise in enumerate(result.get('selected_exercises', []), start=1):
-                exercise_label = f"{i}. {exercise['exercise']} ({exercise['sets']} sets) - {exercise['instructions']} - {exercise['video']}"
-                st.write(exercise_label)
-
-            # Display the random task
-            st.subheader("Bonus Task")
+                with st.container():
+                    st.markdown(f"""
+                        <div class="exercise-card">
+                            <h4>{i}. {exercise['exercise']}</h4>
+                            <p><strong>🔢 Sets:</strong> {exercise['sets']}</p>
+                            <p><strong>📝 Instructions:</strong> {exercise['instructions']}</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Embed YouTube video if available
+                    video_url = exercise.get('video', '')
+                    video_id = extract_youtube_id(video_url)
+                    
+                    if video_id:
+                        col1, col2, col3 = st.columns([1, 2, 1])
+                        with col2:
+                            st.video(f"https://www.youtube.com/watch?v={video_id}")
+                    elif video_url:
+                        st.info(f"📺 [Watch demonstration]({video_url})")
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+            
+            st.markdown("---")
+            
+            # Display bonus task
+            st.markdown("### 🎁 Bonus Challenge")
             random_task = result.get('random_task')
             if random_task:
-                st.write(f"- {random_task['name']} ({random_task['duration']} minutes) - {random_task['description']}")
+                st.markdown(f"""
+                    <div class="bonus-card">
+                        <h4>{random_task['name']}</h4>
+                        <p><strong>⏱️ Duration:</strong> {random_task['duration']} minutes</p>
+                        <p>{random_task['description']}</p>
+                    </div>
+                """, unsafe_allow_html=True)
             else:
-                st.write("No random task available.")
+                st.info("No bonus task available today.")
         else:
-            st.warning("Failed to retrieve tasks.")
+            st.error("❌ Failed to retrieve activities. Please try again.")
 
 if __name__ == "__main__":
     main()
