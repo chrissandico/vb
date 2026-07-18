@@ -36,3 +36,8 @@ Sheet, and emails it to theprofmeta@gmail.com.
        `.streamlit/secrets.toml.example`).
      - Missing Google Sheets credentials - `service-account.json` or the
        `[gcp_service_account]` secrets section needs to be configured.
+     - Email send failure (`Error sending email: ...`) - the Sheets fetch and
+       exercise selection succeeded, but Gmail SMTP rejected the send (e.g.
+       wrong `app_password`, revoked App Password, or a network issue) -
+       suggest checking the `[gmail]` app_password in `.streamlit/secrets.toml`
+       is a valid Gmail App Password, not the real account password.
