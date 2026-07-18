@@ -1,9 +1,10 @@
 import streamlit as st
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import random
 import json
 import os
+
+from sheets_client import get_client
 
 # Google Sheets configuration
 SPREADSHEET_ID = "1CSokDhyaVLpc9tJgJDKD-y6G_ClmN7aRFrUL6xursro"
@@ -11,22 +12,11 @@ SPREADSHEET_ID = "1CSokDhyaVLpc9tJgJDKD-y6G_ClmN7aRFrUL6xursro"
 @st.cache_resource
 def get_sheets_client():
     """Initialize and cache the Google Sheets client"""
-    scope = ['https://spreadsheets.google.com/feeds',
-             'https://www.googleapis.com/auth/drive']
-    
-    # Try to load from Streamlit secrets first (for cloud deployment)
-    if hasattr(st, 'secrets') and 'gcp_service_account' in st.secrets:
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(
-            st.secrets['gcp_service_account'], scope)
-    # Fall back to local file (for local development)
-    elif os.path.exists('service-account.json'):
-        creds = ServiceAccountCredentials.from_json_keyfile_name(
-            'service-account.json', scope)
-    else:
+    secrets = st.secrets if hasattr(st, 'secrets') else None
+    client = get_client(secrets)
+    if not client:
         st.error("Google Sheets credentials not found. Please configure secrets.")
-        return None
-    
-    return gspread.authorize(creds)
+    return client
 
 def fetch_activities(name):
     """Fetch activities from Google Sheets for the specified user"""
