@@ -1,5 +1,11 @@
 """Generate a 30-minute, 6-exercise workout plan by type and email it."""
+import os
 import random
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import toml
 
 NUM_EXERCISES = 6
 TOTAL_MINUTES = 30
@@ -44,3 +50,48 @@ def select_exercises(all_records, workout_type):
         i += 1
     random.shuffle(selected)
     return selected
+
+
+def load_local_secrets():
+    path = os.path.join('.streamlit', 'secrets.toml')
+    if os.path.exists(path):
+        return toml.load(path)
+    return None
+
+
+def build_email_html(workout_type, exercises):
+    rows = []
+    for i, ex in enumerate(exercises, start=1):
+        label = f"{ex['Exercise']} (Round 2)" if ex.get('_repeat') else ex['Exercise']
+        video_url = ex.get('Example', '')
+        video_link = f'<p><a href="{video_url}">Watch demo</a></p>' if video_url else ''
+        rows.append(f"""
+            <div style="margin-bottom:16px;padding:12px;border-left:4px solid #667eea;">
+                <h3 style="margin:0 0 4px 0;">{i}. {label}</h3>
+                <p style="margin:2px 0;"><strong>Sets:</strong> {ex.get('Sets', '')}</p>
+                <p style="margin:2px 0;"><strong>Time:</strong> {MINUTES_PER_EXERCISE} minutes</p>
+                <p style="margin:2px 0;"><strong>Instructions:</strong> {ex.get('Instructions', '')}</p>
+                {video_link}
+            </div>
+        """)
+    return f"""
+        <html><body>
+        <h2>Your {TOTAL_MINUTES}-Minute {workout_type} Workout</h2>
+        {''.join(rows)}
+        </body></html>
+    """
+
+
+def send_email(gmail_secrets, subject, html_body):
+    sender = gmail_secrets['sender_email']
+    password = gmail_secrets['app_password']
+
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = sender
+    msg.attach(MIMEText(html_body, 'html'))
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        server.login(sender, password)
+        server.sendmail(sender, [sender], msg.as_string())
