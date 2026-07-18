@@ -46,6 +46,7 @@ def select_exercises(all_records, workout_type):
         return [dict(r) for r in random.sample(matches, NUM_EXERCISES)]
 
     selected = [dict(r) for r in matches]
+    random.shuffle(selected)
     pool = list(matches)
     random.shuffle(pool)
     i = 0
@@ -54,7 +55,6 @@ def select_exercises(all_records, workout_type):
         repeat['_repeat'] = True
         selected.append(repeat)
         i += 1
-    random.shuffle(selected)
     return selected
 
 
