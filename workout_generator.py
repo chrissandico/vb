@@ -1,11 +1,17 @@
 """Generate a 30-minute, 6-exercise workout plan by type and email it."""
+import argparse
 import os
 import random
 import smtplib
+import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import toml
+
+from sheets_client import get_client
+
+SPREADSHEET_ID = "1CSokDhyaVLpc9tJgJDKD-y6G_ClmN7aRFrUL6xursro"
 
 NUM_EXERCISES = 6
 TOTAL_MINUTES = 30
@@ -95,3 +101,54 @@ def send_email(gmail_secrets, subject, html_body):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
         server.login(sender, password)
         server.sendmail(sender, [sender], msg.as_string())
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate and email a 30-minute, 6-exercise workout plan.")
+    parser.add_argument('--type', required=True,
+                         help='Workout type to filter by, e.g. "Upper Body", "Core"')
+    parser.add_argument('--dry-run', action='store_true',
+                         help='Print the email instead of sending it')
+    args = parser.parse_args()
+
+    secrets = load_local_secrets()
+    client = get_client(secrets)
+    if not client:
+        print("Error: Google Sheets credentials not found. "
+              "Configure service-account.json or .streamlit/secrets.toml.", file=sys.stderr)
+        sys.exit(1)
+
+    spreadsheet = client.open_by_key(SPREADSHEET_ID)
+    all_records = spreadsheet.worksheet('exercises').get_all_records()
+
+    try:
+        selected = select_exercises(all_records, args.type)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    html_body = build_email_html(args.type, selected)
+    subject = f"Your 30-Minute {args.type} Workout"
+
+    if args.dry_run:
+        print(f"Subject: {subject}\n")
+        print(html_body)
+        return
+
+    if not secrets or 'gmail' not in secrets:
+        print("Error: Gmail secrets not found. Add a [gmail] section to "
+              ".streamlit/secrets.toml (see .streamlit/secrets.toml.example).", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        send_email(secrets['gmail'], subject, html_body)
+    except Exception as e:
+        print(f"Error sending email: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Workout plan emailed to {secrets['gmail']['sender_email']}.")
+
+
+if __name__ == '__main__':
+    main()
