@@ -18,7 +18,8 @@ def select_exercises(all_records, workout_type):
 
     If fewer than NUM_EXERCISES rows match, randomly repeats matched rows
     (marked with '_repeat': True) to fill the remainder. Raises ValueError
-    if zero rows match.
+    if zero rows match. Every returned entry is a shallow copy of its source
+    row dict, so mutating a returned entry never affects all_records.
     """
     wanted = workout_type.strip().lower()
     matches = [
@@ -30,9 +31,9 @@ def select_exercises(all_records, workout_type):
         raise ValueError(f"No exercises found with type '{workout_type}'.")
 
     if len(matches) >= NUM_EXERCISES:
-        return random.sample(matches, NUM_EXERCISES)
+        return [dict(r) for r in random.sample(matches, NUM_EXERCISES)]
 
-    selected = list(matches)
+    selected = [dict(r) for r in matches]
     pool = list(matches)
     random.shuffle(pool)
     i = 0
