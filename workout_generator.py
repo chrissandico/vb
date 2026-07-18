@@ -119,8 +119,12 @@ def main():
               "Configure service-account.json or .streamlit/secrets.toml.", file=sys.stderr)
         sys.exit(1)
 
-    spreadsheet = client.open_by_key(SPREADSHEET_ID)
-    all_records = spreadsheet.worksheet('exercises').get_all_records()
+    try:
+        spreadsheet = client.open_by_key(SPREADSHEET_ID)
+        all_records = spreadsheet.worksheet('exercises').get_all_records()
+    except Exception as e:
+        print(f"Error fetching exercises: {e}", file=sys.stderr)
+        sys.exit(1)
 
     try:
         selected = select_exercises(all_records, args.type)
