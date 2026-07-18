@@ -1,8 +1,5 @@
 import streamlit as st
-import gspread
 import random
-import json
-import os
 
 from sheets_client import get_client
 
