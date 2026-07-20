@@ -33,7 +33,7 @@ Everything lives in `app.py`. There is no backend service — it talks directly 
 ### Expected Google Sheet structure
 
 - **poppies**: `Task Name`, `Task Description`, `Type`, `Duration`
-- **exercises**: `Exercise`, `Sets`, `Instructions`, `Example` (a YouTube URL), `Type`
+- **exercises**: `Exercise`, `Sets`, `Instructions`, `Example` (a YouTube URL), `Type`, `Major Muscles`, `Minor Muscles` (the last two are read by `workout_generator.py`'s email template, not by `app.py`)
 - **history**: historical activity log (not currently read by `app.py`)
 
 ### Credentials

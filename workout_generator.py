@@ -68,22 +68,51 @@ def load_local_secrets():
 def build_email_html(workout_type, exercises):
     rows = []
     for i, ex in enumerate(exercises, start=1):
-        label = f"{ex['Exercise']} (Round 2)" if ex.get('_repeat') else ex['Exercise']
+        label = f"{ex['Exercise']} (again!)" if ex.get('_repeat') else ex['Exercise']
         video_url = ex.get('Example', '')
-        video_link = f'<p><a href="{video_url}">Watch demo</a></p>' if video_url else ''
+        video_link = (
+            f'<p style="margin:10px 0 0 0;">'
+            f'<a href="{video_url}" style="display:inline-block;background-color:#667eea;'
+            f'color:#ffffff;padding:8px 18px;border-radius:20px;text-decoration:none;'
+            f'font-weight:bold;font-size:15px;">&#9654; Watch how</a></p>'
+        ) if video_url else ''
+        major_muscles = ex.get('Major Muscles', '')
+        minor_muscles = ex.get('Minor Muscles', '')
+        muscle_bits = []
+        if major_muscles:
+            muscle_bits.append(f'<strong>Main:</strong> {major_muscles}')
+        if minor_muscles:
+            muscle_bits.append(f'<strong>Also:</strong> {minor_muscles}')
+        muscle_line = (
+            f'<p style="margin:6px 0 0 0;font-size:14px;color:#777777;">'
+            f'&#127919; {"&nbsp;&nbsp;&nbsp;".join(muscle_bits)}</p>'
+        ) if muscle_bits else ''
         rows.append(f"""
-            <div style="margin-bottom:16px;padding:12px;border-left:4px solid #667eea;">
-                <h3 style="margin:0 0 4px 0;">{i}. {label}</h3>
-                <p style="margin:2px 0;"><strong>Sets:</strong> {ex.get('Sets', '')}</p>
-                <p style="margin:2px 0;"><strong>Time:</strong> {MINUTES_PER_EXERCISE} minutes</p>
-                <p style="margin:2px 0;"><strong>Instructions:</strong> {ex.get('Instructions', '')}</p>
+            <div style="margin-bottom:18px;padding:16px;border-radius:12px;
+                        border-left:6px solid #667eea;background-color:#f7f7fb;">
+                <p style="margin:0 0 8px 0;font-size:20px;color:#333333;">
+                    <span style="color:#667eea;">&#9744;</span> <strong>{i}. {label}</strong>
+                </p>
+                <p style="margin:2px 0;font-size:16px;color:#555555;">
+                    &#128257; {ex.get('Sets', '')} sets &nbsp;&nbsp; &#9200; {MINUTES_PER_EXERCISE} min
+                </p>
+                <p style="margin:6px 0 0 0;font-size:16px;color:#333333;">{ex.get('Instructions', '')}</p>
+                {muscle_line}
                 {video_link}
             </div>
         """)
     return f"""
-        <html><body>
-        <h2>Your {TOTAL_MINUTES}-Minute {workout_type} Workout</h2>
+        <html><body style="font-family:Arial, Helvetica, sans-serif;">
+        <h1 style="text-align:center;color:#667eea;font-size:26px;">
+            &#127919; Your {TOTAL_MINUTES}-Minute {workout_type} Workout!
+        </h1>
+        <p style="text-align:center;font-size:16px;color:#555555;">
+            Check off each one as you finish it &mdash; you've got this! &#128170;
+        </p>
         {''.join(rows)}
+        <p style="text-align:center;font-size:18px;color:#667eea;margin-top:10px;">
+            &#127775; Awesome job! See you next workout! &#127775;
+        </p>
         </body></html>
     """
 
