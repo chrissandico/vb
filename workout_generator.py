@@ -91,16 +91,17 @@ def build_email_html(workout_type, exercises):
 def send_email(gmail_secrets, subject, html_body):
     sender = gmail_secrets['sender_email']
     password = gmail_secrets['app_password']
+    recipients = gmail_secrets.get('recipients') or [sender]
 
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = sender
-    msg['To'] = sender
+    msg['To'] = ', '.join(recipients)
     msg.attach(MIMEText(html_body, 'html'))
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
         server.login(sender, password)
-        server.sendmail(sender, [sender], msg.as_string())
+        server.sendmail(sender, recipients, msg.as_string())
 
 
 def main():
@@ -151,7 +152,8 @@ def main():
         print(f"Error sending email: {e}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Workout plan emailed to {secrets['gmail']['sender_email']}.")
+    recipients = secrets['gmail'].get('recipients') or [secrets['gmail']['sender_email']]
+    print(f"Workout plan emailed to {', '.join(recipients)}.")
 
 
 if __name__ == '__main__':

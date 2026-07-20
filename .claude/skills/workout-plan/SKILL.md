@@ -7,7 +7,9 @@ description: Use when the user asks for a workout plan, workout email, or exerci
 
 Generates a 30-minute, 6-exercise workout plan filtered by type (e.g. "Core",
 "Upper Body", "Lower Body", "Mobility", "Warmup") from the `exercises` Google
-Sheet, and emails it to theprofmeta@gmail.com.
+Sheet, and emails it to the recipient(s) configured in the `[gmail]` section
+of `.streamlit/secrets.toml` (defaults to the sender's own address if no
+`recipients` list is set).
 
 ## Usage
 
@@ -24,7 +26,7 @@ Sheet, and emails it to theprofmeta@gmail.com.
    check formatting without sending mail.
 
 3. Report the script's own output back to the user verbatim-ish:
-   - Success prints `Workout plan emailed to theprofmeta@gmail.com.`
+   - Success prints `Workout plan emailed to <recipients>.`
    - Failure exits non-zero with an `Error: ...` message on stderr - surface
      that message to the user rather than claiming success. Common cases:
      - No exercises of that type exist yet in the sheet (`Error: No exercises

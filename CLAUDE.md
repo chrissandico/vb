@@ -45,7 +45,7 @@ Everything lives in `app.py`. There is no backend service — it talks directly 
 
 `workout_generator.py` and the `.claude/skills/workout-plan/` project skill
 generate a 6-exercise, 30-minute workout plan filtered by `Type` (from the
-`exercises` worksheet) and email it to theprofmeta@gmail.com via Gmail SMTP.
+`exercises` worksheet) and email it via Gmail SMTP.
 
 ```bash
 python workout_generator.py --type "Core"           # generates and emails
@@ -53,9 +53,10 @@ python workout_generator.py --type "Core" --dry-run # prints instead of emailing
 ```
 
 Requires a `[gmail]` section in `.streamlit/secrets.toml` with `sender_email`
-and `app_password` (a Gmail App Password, not the real account password) —
-see `.streamlit/secrets.toml.example`. Shares Google Sheets credential
-loading with `app.py` via `sheets_client.py`.
+and `app_password` (a Gmail App Password, not the real account password), plus
+an optional `recipients` list (defaults to `[sender_email]` if omitted) — see
+`.streamlit/secrets.toml.example`. Shares Google Sheets credential loading
+with `app.py` via `sheets_client.py`.
 
 ### `.kiro/steering/` docs
 
